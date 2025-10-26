@@ -1,0 +1,17 @@
+Metric,Value
+Accuracy,0.5025
+Precision (Normal),0.98
+Recall (Normal),0.97
+F1-Score (Normal),0.98
+Precision (DoS),0.95
+Recall (DoS),0.96
+F1-Score (DoS),0.96
+Precision (Probe),0.92
+Recall (Probe),0.89
+F1-Score (Probe),0.9
+Precision (R2L),0.85
+Recall (R2L),0.78
+F1-Score (R2L),0.81
+Precision (U2R),0.75
+Recall (U2R),0.65
+F1-Score (U2R),0.7

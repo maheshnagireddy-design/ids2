@@ -1,0 +1,108 @@
+<meta name="no-bottom-nav" content="1">
+{% extends "base.html" %}
+
+{% block title %}Intrusion Detection System - Secure Your Network{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row align-items-center min-vh-100">
+        <div class="col-lg-6">
+            <div class="card border-0 bg-transparent">
+                <div class="card-body p-0">
+                    <h1 class="display-4 fw-bold text-white mb-4">
+                        Advanced Network<br>
+                        <span class="text-warning">Intrusion Detection</span>
+                    </h1>
+                    <p class="lead text-white-50 mb-4">
+                        Protect your network with AI-powered threat detection using Random Forest machine learning. 
+                        Real-time monitoring and analysis of network traffic patterns.
+                    </p>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary btn-lg px-4 me-md-2">
+                                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                            </a>
+                            <a href="{{ url_for('detection.live_detection') }}" class="btn btn-outline-light btn-lg px-4">
+                                <i class="bi bi-activity me-2"></i>Live Detection
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-4 me-md-2">
+                                <i class="bi bi-person-plus me-2"></i>Get Started
+                            </a>
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg px-4">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card bg-white bg-opacity-10 border-0 backdrop-blur">
+                <div class="card-body p-4">
+                    <h3 class="card-title text-white mb-4">
+                        <i class="bi bi-cpu-fill text-warning me-2"></i>System Features
+                    </h3>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center text-white">
+                                <i class="bi bi-shield-check text-success me-3" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <h6 class="mb-1">Real-time Detection</h6>
+                                    <small class="text-white-50">Live network monitoring</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center text-white">
+                                <i class="bi bi-brain text-info me-3" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <h6 class="mb-1">AI-Powered</h6>
+                                    <small class="text-white-50">Random Forest ML</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center text-white">
+                                <i class="bi bi-people text-warning me-3" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <h6 class="mb-1">Role-based Access</h6>
+                                    <small class="text-white-50">Multi-level permissions</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center text-white">
+                                <i class="bi bi-graph-up text-success me-3" style="font-size: 1.5rem;"></i>
+                                <div>
+                                    <h6 class="mb-1">Analytics</h6>
+                                    <small class="text-white-50">Detailed reports</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 border-light">
+
+                    <div class="text-center">
+                        <h6 class="text-white mb-2">Supported Attack Types</h6>
+                        <div class="d-flex flex-wrap justify-content-center gap-2">
+                            <span class="badge bg-danger">DoS Attacks</span>
+                            <span class="badge bg-warning">Probe Attacks</span>
+                            <span class="badge bg-info">R2L Attacks</span>
+                            <span class="badge bg-secondary">U2R Attacks</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

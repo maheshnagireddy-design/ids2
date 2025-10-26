@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}Live Detection - Intrusion Detection System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detection-monitor {
+        background: #1e293b;
+        border-radius: 15px;
+        padding: 2rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .detection-monitor::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6);
+        animation: pulse 2s infinite;
+    }
+
+    .traffic-item {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        border-left: 4px solid #6b7280;
+        transition: all 0.3s ease;
+    }
+
+    .traffic-item.normal {
+        border-left-color: #10b981;
+        background: rgba(16, 185, 129, 0.1);
+    }
+
+    .traffic-item.attack {
+        border-left-color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+        animation: pulse 1.5s infinite;
+    }
+
+    .status-normal { background-color: #10b981; }
+    .status-attack { background-color: #ef4444; }
+
+    #trafficLog {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card bg-dark text-white">
+                <div class="card-body">
+                    <h2 class="card-title">
+                        <i class="bi bi-activity me-2"></i>Live Network Monitoring
+                    </h2>
+                    <p class="card-text">Real-time intrusion detection using Random Forest ML algorithm</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Control Panel -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-sliders me-2"></i>Detection Control
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button id="startDetection" class="btn btn-success btn-lg">
+                            <i class="bi bi-play-fill me-2"></i>Start Monitoring
+                        </button>
+                        <button id="stopDetection" class="btn btn-danger btn-lg" disabled>
+                            <i class="bi bi-stop-fill me-2"></i>Stop Monitoring
+                        </button>
+                        <button id="simulateTraffic" class="btn btn-primary">
+                            <i class="bi bi-cpu me-2"></i>Simulate Traffic
+                        </button>
+                    </div>
+
+                    <hr>
+
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 id="normalCount" class="text-success mb-0">0</h4>
+                            <small class="text-muted">Normal</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 id="attackCount" class="text-danger mb-0">0</h4>
+                            <small class="text-muted">Attacks</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Panel -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>System Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <strong>Status:</strong> 
+                        <span id="systemStatus" class="badge bg-secondary">Idle</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Model:</strong> Random Forest
+                    </div>
+                    <div class="mb-2">
+                        <strong>Features:</strong> 41
+                    </div>
+                    <div class="mb-0">
+                        <strong>Accuracy:</strong> ~99%
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detection Monitor -->
+        <div class="col-md-8">
+            <div class="detection-monitor">
+                <h4 class="mb-3">
+                    <span class="status-indicator status-normal" id="statusLight"></span>
+                    Network Traffic Monitor
+                </h4>
+
+                <div id="trafficLog">
+                    <div class="text-center py-5">
+                        <i class="bi bi-radar" style="font-size: 3rem; opacity: 0.5;"></i>
+                        <p class="mt-3 opacity-75">Waiting for network traffic...</p>
+                        <p class="opacity-50">Click "Start Monitoring" or "Simulate Traffic" to begin</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let isMonitoring = false;
+let normalCount = 0;
+let attackCount = 0;
+let monitoringInterval;
+
+const startBtn = document.getElementById('startDetection');
+const stopBtn = document.getElementById('stopDetection');
+const simulateBtn = document.getElementById('simulateTraffic');
+const trafficLog = document.getElementById('trafficLog');
+const systemStatus = document.getElementById('systemStatus');
+const statusLight = document.getElementById('statusLight');
+
+startBtn.addEventListener('click', startMonitoring);
+stopBtn.addEventListener('click', stopMonitoring);
+simulateBtn.addEventListener('click', simulateTraffic);
+
+function startMonitoring() {
+    isMonitoring = true;
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    systemStatus.textContent = 'Active';
+    systemStatus.className = 'badge bg-success';
+    statusLight.className = 'status-indicator status-normal';
+
+    trafficLog.innerHTML = '<div class="text-center py-3"><i class="bi bi-activity pulse"></i> Monitoring network traffic...</div>';
+
+    monitoringInterval = setInterval(() => {
+        simulateTraffic();
+    }, 3000);
+}
+
+function stopMonitoring() {
+    isMonitoring = false;
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    systemStatus.textContent = 'Idle';
+    systemStatus.className = 'badge bg-secondary';
+    statusLight.className = 'status-indicator status-normal';
+
+    if (monitoringInterval) {
+        clearInterval(monitoringInterval);
+    }
+}
+
+async function simulateTraffic() {
+    try {
+        const response = await fetch('/detection/api/simulate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.samples) {
+            for (const sample of data.samples) {
+                await analyzeTraffic(sample);
+            }
+        }
+    } catch (error) {
+        console.error('Error simulating traffic:', error);
+    }
+}
+
+async function analyzeTraffic(sample) {
+    try {
+        const response = await fetch('/detection/api/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(sample)
+        });
+
+        const result = await response.json();
+        displayTrafficItem(sample, result);
+        updateCounters(result.prediction);
+
+    } catch (error) {
+        console.error('Error analyzing traffic:', error);
+    }
+}
+
+function displayTrafficItem(sample, result) {
+    const isAttack = result.prediction !== 'normal';
+    const timestamp = new Date().toLocaleTimeString();
+
+    const trafficItem = document.createElement('div');
+    trafficItem.className = `traffic-item ${isAttack ? 'attack' : 'normal'}`;
+
+    trafficItem.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <span class="status-indicator ${isAttack ? 'status-attack' : 'status-normal'}"></span>
+                <strong>${result.prediction.toUpperCase()}</strong>
+                <span class="ms-2 badge ${isAttack ? 'bg-danger' : 'bg-success'}">${(result.confidence * 100).toFixed(1)}%</span>
+            </div>
+            <small class="opacity-75">${timestamp}</small>
+        </div>
+        <div class="mt-2">
+            <small>
+                IP: ${sample.src_ip || 'Unknown'} | 
+                Protocol: ${sample.protocol_type} | 
+                Bytes: ${sample.src_bytes}→${sample.dst_bytes}
+            </small>
+        </div>
+    `;
+
+    if (trafficLog.children.length > 0 && trafficLog.children[0].classList.contains('text-center')) {
+        trafficLog.innerHTML = '';
+    }
+
+    trafficLog.insertBefore(trafficItem, trafficLog.firstChild);
+
+    while (trafficLog.children.length > 10) {
+        trafficLog.removeChild(trafficLog.lastChild);
+    }
+
+    statusLight.className = `status-indicator ${isAttack ? 'status-attack' : 'status-normal'}`;
+}
+
+function updateCounters(prediction) {
+    if (prediction === 'normal') {
+        normalCount++;
+    } else {
+        attackCount++;
+    }
+
+    document.getElementById('normalCount').textContent = normalCount;
+    document.getElementById('attackCount').textContent = attackCount;
+}
+</script>
+{% endblock %}

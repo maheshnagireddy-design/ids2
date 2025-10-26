@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Edit User - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Edit User: {{ user.username }}</h2>
+  <form method="POST" action="{{ url_for('admin.edit_user', user_id=user.id) }}">
+    <div class="mb-3">
+      <label for="username" class="form-label">Username</label>
+      <input type="text" name="username" id="username" value="{{ user.username }}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="email" class="form-label">Email</label>
+      <input type="email" name="email" id="email" value="{{ user.email }}" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="password" class="form-label">New Password (leave blank to keep current)</label>
+      <input type="password" name="password" id="password" class="form-control" placeholder="New Password">
+    </div>
+
+    <div class="mb-3">
+      <label for="confirm_password" class="form-label">Confirm New Password</label>
+      <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Confirm New Password">
+    </div>
+
+    <div class="mb-3">
+      <label for="role" class="form-label">Role</label>
+      <select name="role" id="role" class="form-select" required>
+        <option value="User" {% if user.role == 'User' %}selected{% endif %}>User</option>
+        {% if current_user.role == 'SuperAdmin' %}
+        <option value="Admin" {% if user.role == 'Admin' %}selected{% endif %}>Admin</option>
+        {% endif %}
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update User</button>
+    <a href="{{ url_for('admin.users') }}" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
+</div>
+{% endblock %}
